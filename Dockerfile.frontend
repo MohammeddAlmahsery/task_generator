@@ -1,27 +1,49 @@
-# React Frontend Dockerfile
-FROM node:18-alpine
+###############################
+# Frontend Multi-Stage Dockerfile
+###############################
 
+FROM node:18-alpine AS base
 WORKDIR /app
+RUN apk add --no-cache libc6-compat curl
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable
 
-# Install curl for health checks
+# 1. Dependencies layer (only lock + manifest for caching)
+FROM base AS deps
+COPY frontend/package.json ./
+COPY frontend/pnpm-lock.yaml ./
+# Try strict install first; if lockfile out-of-sync (during iterative dev), fallback gracefully.
+RUN (pnpm install --frozen-lockfile) || (echo "Lockfile out of date; falling back to non-frozen install" && pnpm install)
+
+# 2. Build layer
+FROM base AS build
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+COPY frontend ./
+# Build Next.js (will also run Tailwind through PostCSS)
+RUN pnpm build
+
+# 3. Production runtime (minimal)
+FROM node:18-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
 RUN apk add --no-cache curl
 
-# Copy package.json and package-lock files
-COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
-# Install pnpm and dependencies
-RUN npm install -g pnpm
-RUN pnpm install --no-frozen-lockfile
+# Copy only necessary build output
+COPY --from=build /app/public ./public
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/package.json ./
 
-# Copy source code
-COPY frontend/ .
-
-# Expose port
+USER nextjs
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:3000 || exit 1
 
-# Start the application in development mode
-CMD ["pnpm", "dev"]
+ENV PORT=3000
+CMD ["node", "server.js"]

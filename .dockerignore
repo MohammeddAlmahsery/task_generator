@@ -26,3 +26,12 @@
 **/*.log
 **/.DS_Store
 **/Thumbs.db
+# Frontend specific additions
+**/pnpm-debug.log*
+**/yarn-error.log*
+**/npm-debug.log*
+.env
+.env.*
+!.env.example
+frontend/.next/
+frontend/node_modules/
