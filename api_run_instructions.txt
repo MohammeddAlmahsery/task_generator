@@ -1,0 +1,19 @@
+1) Install deps:
+   pip install -r /home/mohammedalmahsery/zinc/test_project/requirements.txt
+
+2) Set API key:
+   export GEMINI_API_KEY=your_key_here
+
+3) Run server:
+   uvicorn api:app --host 0.0.0.0 --port 8000 --reload
+
+4) Call endpoint (multipart/form-data):
+   curl -X POST "http://localhost:8000/generate" \
+        -H "accept: text/markdown" \
+        -H "Content-Type: multipart/form-data" \
+        -F "resume=@/path/to/resume.(txt|docx|pdf)" \
+        -F "project=@/path/to/project.(txt|docx|pdf)" \
+        -o intern_task_report.md
+
+Response is a Markdown file attachment named intern_task_report.md.
+
