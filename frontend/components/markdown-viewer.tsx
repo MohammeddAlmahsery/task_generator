@@ -35,19 +35,38 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
             h3: ({ node, ...props }) => <h3 className="text-xl font-semibold mt-4 mb-2" {...props} />,
             p: ({ node, ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
             code: ({ inline, className, children, ...props }) => {
-              if (inline) {
-                return <code className={"rounded bg-gray-100 px-1 py-0.5 text-sm " + (className || "")} {...props}>{children}</code>
+              const raw = String(children)
+              const hasNewline = /\n/.test(raw)
+              const hasLanguage = /language-/.test(className || '')
+              const isInline = inline ?? (!hasNewline && !hasLanguage)
+
+              if (isInline) {
+                return (
+                  <code
+                    className={
+                      "rounded bg-gray-100 dark:bg-slate-800/60 px-1.5 py-0.5 font-mono text-[0.8rem] tracking-tight " +
+                      (className || '')
+                    }
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                )
               }
-              const text = String(children).replace(/\n$/, '')
+
+              const text = raw.replace(/\n$/, '')
               return (
-                <div className="group relative">
-                  <pre className="bg-gray-900 text-gray-100 rounded p-4 overflow-auto mb-4" {...props}>
+                <div className="group relative not-prose">
+                  <pre
+                    className="bg-gray-50 dark:bg-slate-900/60 text-[13px] leading-relaxed text-slate-800 dark:text-slate-100 rounded-md border border-gray-200 dark:border-slate-700 p-4 overflow-auto mb-4 font-mono"
+                    {...props}
+                  >
                     <code className={className}>{text}</code>
                   </pre>
                   <button
                     type="button"
                     onClick={() => copy(text)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded border border-gray-500"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 text-[11px] bg-white/90 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-200 px-2 py-0.5 rounded border border-gray-300 dark:border-slate-600 shadow-sm"
                     aria-label="Copy code"
                   >
                     Copy
