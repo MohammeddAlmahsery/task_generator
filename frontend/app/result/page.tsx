@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect, Suspense } from "react"
 import { MarkdownViewer } from "@/components/markdown-viewer"
+import { MarkdownViewerWithNav } from "@/components/markdown-viewer-with-nav"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Navigation } from "@/components/navigation"
@@ -90,20 +91,22 @@ function ResultContent() {
       <FloatingElements />
 
       <div className="relative z-10 pt-24 pb-12 px-4">
-        <div className="max-w-6xl mx-auto">
+        <div className={`${showPreview ? '' : 'max-w-6xl mx-auto'}`}>
 
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
-              Mission Plan Generated
-            </h1>
-            <p className="text-lg text-gray-700">
-              Your personalized mission plan is ready for download and review
-            </p>
-          </div>
+          {!showPreview && (
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+                Mission Plan Generated
+              </h1>
+              <p className="text-lg text-gray-700">
+                Your personalized mission plan is ready for download and review
+              </p>
+            </div>
+          )}
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
+          <div className={`flex flex-wrap ${showPreview ? 'justify-start lg:ml-64 px-4' : 'justify-center'} gap-4 mb-8`}>
             <Button
               onClick={() => setShowPreview(!showPreview)}
               className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2"
@@ -128,15 +131,15 @@ function ResultContent() {
           </div>
 
           {/* Content Display */}
-          <Card className="p-8 bg-white border-gray-200 border-2">
-            {showPreview ? (
-              <MarkdownViewer content={markdown} className="prose prose-lg max-w-none" />
-            ) : (
+          {showPreview ? (
+            <MarkdownViewerWithNav content={markdown} />
+          ) : (
+            <Card className="p-8 bg-white border-gray-200 border-2">
               <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-6 rounded-lg overflow-auto max-h-96">
                 {markdown}
               </pre>
-            )}
-          </Card>
+            </Card>
+          )}
 
         </div>
       </div>

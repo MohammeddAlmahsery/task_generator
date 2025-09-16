@@ -3,15 +3,55 @@
 import React from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
+
+export interface HeadingInfo {
+  id: string
+  text: string
+  level: number
+}
 
 interface MarkdownViewerProps {
   content: string
   className?: string
+  onHeadingsChange?: (headings: HeadingInfo[]) => void
+}
+
+// Utility function to generate slug from heading text
+const generateSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .trim()
 }
 
 // Centralized markdown renderer so we can adjust styling / plugins in one place.
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className, onHeadingsChange }) => {
+  
+  // Extract headings from markdown content
+  const headings = useMemo(() => {
+    const headingRegex = /^(#{1,2})\s+(.+)$/gm
+    const extractedHeadings: HeadingInfo[] = []
+    let match
+    
+    while ((match = headingRegex.exec(content)) !== null) {
+      const level = match[1].length
+      const text = match[2].trim()
+      const id = generateSlug(text)
+      
+      extractedHeadings.push({ id, text, level })
+    }
+    
+    return extractedHeadings
+  }, [content])
+
+  // Notify parent component about headings change
+  React.useEffect(() => {
+    if (onHeadingsChange) {
+      onHeadingsChange(headings)
+    }
+  }, [headings, onHeadingsChange])
 
   const copy = useCallback(async (text: string) => {
     try {
@@ -30,8 +70,16 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
           ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-1" {...props} />,
             ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-1" {...props} />,
             li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
-            h2: ({ node, ...props }) => <h2 className="text-2xl font-semibold mt-6 mb-3" {...props} />,
+            h1: ({ node, children, ...props }) => {
+              const text = String(children)
+              const id = generateSlug(text)
+              return <h1 id={id} className="text-3xl font-bold mt-8 mb-4 scroll-mt-24" {...props}>{children}</h1>
+            },
+            h2: ({ node, children, ...props }) => {
+              const text = String(children)
+              const id = generateSlug(text)
+              return <h2 id={id} className="text-2xl font-semibold mt-6 mb-3 scroll-mt-24" {...props}>{children}</h2>
+            },
             h3: ({ node, ...props }) => <h3 className="text-xl font-semibold mt-4 mb-2" {...props} />,
             p: ({ node, ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
             code: ({ inline, className, children, ...props }) => {
