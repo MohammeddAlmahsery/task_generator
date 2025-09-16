@@ -15,7 +15,7 @@ export const MarkdownViewerWithNav: React.FC<MarkdownViewerWithNavProps> = ({
   className = ""
 }) => {
   const [headings, setHeadings] = useState<HeadingInfo[]>([])
-  const activeId = useScrollSpy(headings, 120) // Offset for fixed header
+  const activeId = useScrollSpy(headings, 80) // Offset for fixed navbar (64px + padding)
 
   const handleHeadingsChange = (newHeadings: HeadingInfo[]) => {
     setHeadings(newHeadings)
@@ -30,7 +30,7 @@ export const MarkdownViewerWithNav: React.FC<MarkdownViewerWithNavProps> = ({
       />
       
       {/* Main Content */}
-      <div className="lg:ml-64 min-h-screen">
+      <div className="lg:ml-64 min-h-screen pt-16">
         <div className="max-w-4xl mx-auto px-4 py-8 lg:px-8">
           <MarkdownViewer
             content={content}

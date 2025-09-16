@@ -85,13 +85,42 @@ function ResultContent() {
     )
   }
 
+  const actionButtons = (
+    <>
+      <Button
+        onClick={() => setShowPreview(!showPreview)}
+        className="bg-gray-600 hover:bg-gray-700 text-white px-2 sm:px-4 py-2 text-xs sm:text-sm"
+      >
+        <span className="hidden sm:inline">{showPreview ? "Show Raw" : "Show Preview"}</span>
+        <span className="sm:hidden">{showPreview ? "Raw" : "Preview"}</span>
+      </Button>
+      <Button
+        onClick={handleDownload}
+        className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white px-2 sm:px-4 py-2 text-xs sm:text-sm"
+      >
+        <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span className="hidden sm:inline">Download</span>
+        <span className="sm:hidden">DL</span>
+      </Button>
+      <Button
+        onClick={handleBackToUpload}
+        className="bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-4 py-2 text-xs sm:text-sm"
+      >
+        <span className="hidden sm:inline">New Mission</span>
+        <span className="sm:hidden">New</span>
+      </Button>
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <Navigation />
+      <Navigation actions={actionButtons} />
       <FloatingElements />
 
-      <div className="relative z-10 pt-24 pb-12 px-4">
-        <div className={`${showPreview ? '' : 'max-w-6xl mx-auto'}`}>
+      <div className="relative z-10 pt-20 pb-12">
+        <div className={`${showPreview ? '' : 'max-w-6xl mx-auto px-4'}`}>
 
           {/* Header */}
           {!showPreview && (
@@ -104,31 +133,6 @@ function ResultContent() {
               </p>
             </div>
           )}
-
-          {/* Action Buttons */}
-          <div className={`flex flex-wrap ${showPreview ? 'justify-start lg:ml-64 px-4' : 'justify-center'} gap-4 mb-8`}>
-            <Button
-              onClick={() => setShowPreview(!showPreview)}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2"
-            >
-              {showPreview ? "Show Raw Markdown" : "Show Preview"}
-            </Button>
-            <Button
-              onClick={handleDownload}
-              className="bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 text-white px-6 py-2"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Download Markdown
-            </Button>
-            <Button
-              onClick={handleBackToUpload}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
-            >
-              Generate New Mission
-            </Button>
-          </div>
 
           {/* Content Display */}
           {showPreview ? (

@@ -88,7 +88,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-28 left-4 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+        className="lg:hidden fixed top-20 left-4 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
         aria-label="Toggle table of contents"
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -98,8 +98,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       </button>
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:block fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-30 toc-container ${className}`}>
-        <div className="p-6 pt-24 h-full overflow-y-auto">
+      <div className={`hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-30 toc-container ${className}`}>
+        <div className="p-6 h-full overflow-y-auto">
           {tocContent}
         </div>
       </div>
@@ -111,11 +111,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
       {/* Mobile Sidebar */}
       <div className={`
-        lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-50 toc-container
+        lg:hidden fixed top-16 left-0 h-[calc(100vh-4rem)] w-80 max-w-[85vw] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 z-50 toc-container
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'transform translate-x-0' : 'transform -translate-x-full'}
       `}>
-        <div className="p-6 pt-16 h-full overflow-y-auto">
+        <div className="p-6 h-full overflow-y-auto">
           {tocContent}
         </div>
       </div>
