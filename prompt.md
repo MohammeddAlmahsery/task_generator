@@ -83,6 +83,15 @@ Expected Duration: [X days/weeks]
 
 ---
 
+## Next Steps  
+[//]: # (What comes next after learning task's requirements. For example: After learning loops, how can he apply it or enhance its understanding)
+
+- [Immediate action item 1 for intern]  
+- [Immediate action item 2 for intern]  
+- [Immediate action item 3 for intern]
+
+---
+
 ## Resources & References  
 [//]: # (Resources and References the user can refer to to learn what he need to know for the task )
 - [Relevant project docs]  
@@ -91,13 +100,8 @@ Expected Duration: [X days/weeks]
 
 ---
 
-## Next Steps  
-[//]: # (How can the intern benefit from what he has learned in this task)
-
-- [Immediate action item 1 for intern]  
-- [Immediate action item 2 for intern]  
-- [Immediate action item 3 for intern]
-
---- ## Check List
+## Check List
 
 [//]: # (Detailed check list for the intern to track his progress in the task)
+
+---
