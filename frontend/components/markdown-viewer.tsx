@@ -75,9 +75,6 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
 
   // Handle checkbox toggle
   const toggleCheckbox = useCallback((checkboxIndex: number) => {
-    console.log('toggleCheckbox called with index:', checkboxIndex)
-    console.log('onContentChange available:', !!onContentChange)
-    
     const lines = currentContent.split('\n')
     const checkboxRegex = /^(\s*)-\s+\[([ x])\]\s+(.*)$/
 
@@ -85,12 +82,10 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
     const updatedLines = lines.map(line => {
       const match = line.match(checkboxRegex)
       if (match) {
-        console.log(`Found checkbox ${currentCheckboxIndex}:`, line)
         if (currentCheckboxIndex === checkboxIndex) {
           const [, indent, checked, text] = match
           const newChecked = checked === ' ' ? 'x' : ' '
           const newLine = `${indent}- [${newChecked}] ${text}`
-          console.log('Toggling checkbox from:', line, 'to:', newLine)
           currentCheckboxIndex++
           return newLine
         }
@@ -100,7 +95,6 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
     })
 
     const newContent = updatedLines.join('\n')
-    console.log('Setting new content locally and calling parent callback')
     
     // Update local state immediately for instant feedback
     setCurrentContent(newContent)
@@ -180,7 +174,6 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
               if (type === 'checkbox') {
                 // Get current checkbox index and increment counter
                 const currentIndex = checkboxCounter++
-                console.log('Rendering checkbox', currentIndex, 'checked:', checked)
                 
                 return (
                   <input
@@ -188,12 +181,10 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
                     checked={checked}
                     onClick={(e) => {
                       e.preventDefault()
-                      console.log('Checkbox clicked:', currentIndex)
                       toggleCheckbox(currentIndex)
                     }}
                     onChange={(e) => {
                       e.preventDefault()
-                      console.log('Checkbox changed:', currentIndex)
                       toggleCheckbox(currentIndex)
                     }}
                     className="mr-2 h-4 w-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer hover:bg-purple-50 transition-colors"
