@@ -4,7 +4,6 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-
 @dataclass
 class GeminiConfig:
     model: str = "gemini-2.5-pro"
@@ -25,7 +24,7 @@ class GeminiClient:
         if not api_key:
             raise EnvironmentError(
                 f"Environment variable {self.config.api_key_env} is not set.\n"
-                f"Export it first, e.g.:\n\n    export {self.config.api_key_env}=AIzaSyCbcNd65cgnjNVjGrxGNftRLaqUpPKd0ds\n"
+                f"Export it first, e.g.:\n\n    export {self.config.api_key_env}=test\n"
             )
 
         genai.configure(api_key=api_key)
