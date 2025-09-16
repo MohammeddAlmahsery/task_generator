@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, Suspense } from "react"
+import { MarkdownViewer } from "@/components/markdown-viewer"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Navigation } from "@/components/navigation"
@@ -50,20 +51,6 @@ function ResultContent() {
     router.push('/')
   }
 
-  const renderMarkdownPreview = (text: string) => {
-    // Simple markdown to HTML conversion for preview
-    return text
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4 text-gray-900">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold mb-3 text-gray-800">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-medium mb-2 text-gray-700">$1</h3>')
-      .replace(/^\* (.*$)/gim, '<li class="mb-1 text-gray-700">$1</li>')
-      .replace(/^- (.*$)/gim, '<li class="mb-1 text-gray-700">$1</li>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-      .replace(/\n\n/g, '</p><p class="mb-4 text-gray-700">')
-      .replace(/^\n/, '<p class="mb-4 text-gray-700">')
-      .replace(/\n$/, '</p>')
-  }
 
   if (isLoading) {
     return (
@@ -143,10 +130,7 @@ function ResultContent() {
           {/* Content Display */}
           <Card className="p-8 bg-white border-gray-200 border-2">
             {showPreview ? (
-              <div 
-                className="prose prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderMarkdownPreview(markdown) }}
-              />
+              <MarkdownViewer content={markdown} className="prose prose-lg max-w-none" />
             ) : (
               <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-6 rounded-lg overflow-auto max-h-96">
                 {markdown}
