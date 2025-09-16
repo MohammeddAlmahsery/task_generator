@@ -45,4 +45,19 @@ class GeminiClient:
         except Exception:
             return str(response).strip()
 
+    def generate_json(self, system_prompt: str, inputs: dict) -> str:
+        """
+        General-purpose JSON generation call that formats inputs under clear headers
+        and returns the raw model text. The caller is responsible for validating JSON.
+        """
+        formatted_inputs = []
+        for key, value in inputs.items():
+            formatted_inputs.append(f"{key.upper()}:\n{value}")
+        prompt = f"System Prompt:\n{system_prompt}\n\n" + "\n\n".join(formatted_inputs)
+        response = self._model.generate_content(prompt)
+        try:
+            return response.text.strip()
+        except Exception:
+            return str(response).strip()
+
 
