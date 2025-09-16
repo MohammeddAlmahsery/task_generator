@@ -6,7 +6,7 @@ from typing import Optional
 
 @dataclass
 class GeminiConfig:
-    model: str = "gemini-2.5-pro"
+    model: str = "gemini-2.5-flash"
     api_key_env: str = "GEMINI_API_KEY"
 
 
