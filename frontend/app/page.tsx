@@ -11,6 +11,8 @@ export default function MissionExportMVP() {
   const [projectFile, setProjectFile] = useState<File | null>(null)
   const [internFile, setInternFile] = useState<File | null>(null)
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
+  const clearProject = () => setProjectFile(null)
+  const clearIntern = () => setInternFile(null)
 
   const handleProjectUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -154,16 +156,26 @@ export default function MissionExportMVP() {
                   />
                 </label>
                 {projectFile && (
-                  <div className="flex items-center space-x-2 p-3 bg-accent/10 rounded-lg">
-                    <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium text-accent">{projectFile.name}</span>
+                  <div className="flex items-center justify-between p-3 bg-accent/10 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium text-accent break-all max-w-xs">{projectFile.name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearProject}
+                      className="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 transition"
+                      aria-label="Remove project file"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
@@ -212,16 +224,26 @@ export default function MissionExportMVP() {
                   />
                 </label>
                 {internFile && (
-                  <div className="flex items-center space-x-2 p-3 bg-accent/10 rounded-lg">
-                    <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium text-accent">{internFile.name}</span>
+                  <div className="flex items-center justify-between p-3 bg-accent/10 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium text-accent break-all max-w-xs">{internFile.name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearIntern}
+                      className="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 transition"
+                      aria-label="Remove intern file"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
