@@ -24,9 +24,10 @@ services:
     container_name: task-generator-backend
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - PYTHONPATH=/app
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
     volumes:
       - uploads_data:/app/uploads
       - temp_data:/tmp

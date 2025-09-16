@@ -39,30 +39,41 @@ export default function MissionExportMVP() {
       formData.append('resume', internFile);
       formData.append('project', projectFile);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      // Normalize API URL. Default now points to 8000 (FastAPI) instead of legacy 5000.
+      const rawEnv = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = rawEnv.replace(/\/$/, '');
+
       const response = await fetch(`${apiUrl}/generate`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const txt = await response.text().catch(() => '');
+        throw new Error(`HTTP ${response.status} ${response.statusText} - ${txt.slice(0,200)}`);
       }
 
-      const result = await response.json();
-      
-      if (result.status === 'error') {
-        alert(`Generation failed: ${result.message}`);
-        return;
+      // Backend returns raw markdown (text/markdown) OR could in future return JSON. Handle both.
+      const contentType = response.headers.get('content-type') || '';
+      let markdown: string = '';
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        markdown = data.md || data.content || JSON.stringify(data, null, 2);
+      } else {
+        markdown = await response.text();
       }
 
-      // Navigate to result page with markdown content
-      const encodedMarkdown = encodeURIComponent(result.md);
+      if (!markdown.trim()) {
+        throw new Error('Empty response from backend.');
+      }
+
+      // Encode and redirect to result page.
+      const encodedMarkdown = encodeURIComponent(markdown);
       window.location.href = `/result?md=${encodedMarkdown}`;
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating mission:', error);
-      alert('Failed to generate mission. Please ensure the Python server is running on localhost:5000.');
+      alert(`Failed to generate mission. Backend expected at ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} /generate.\n\n${error?.message || error}`);
     } finally {
       setIsGenerating(false);
     }
