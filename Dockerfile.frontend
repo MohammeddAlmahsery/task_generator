@@ -12,14 +12,15 @@ RUN corepack enable
 # 1. Dependencies layer (only lock + manifest for caching)
 FROM base AS deps
 COPY frontend/package.json ./
-COPY frontend/pnpm-lock.yaml ./
-# Try strict install first; if lockfile out-of-sync (during iterative dev), fallback gracefully.
-RUN (pnpm install --frozen-lockfile) || (echo "Lockfile out of date; falling back to non-frozen install" && pnpm install)
+# Always generate fresh lockfile in container - completely isolated from local
+RUN pnpm install --lockfile-only
+RUN pnpm install --frozen-lockfile
 
 # 2. Build layer
 FROM base AS build
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY frontend ./
 # Build Next.js (will also run Tailwind through PostCSS)
 RUN pnpm build
