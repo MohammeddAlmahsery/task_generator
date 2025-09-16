@@ -8,17 +8,25 @@ import { useScrollSpy } from "../hooks/use-scroll-spy"
 interface MarkdownViewerWithNavProps {
   content: string
   className?: string
+  onContentChange?: (content: string) => void
 }
 
 export const MarkdownViewerWithNav: React.FC<MarkdownViewerWithNavProps> = ({
   content,
-  className = ""
+  className = "",
+  onContentChange
 }) => {
   const [headings, setHeadings] = useState<HeadingInfo[]>([])
   const activeId = useScrollSpy(headings, 80) // Offset for fixed navbar (64px + padding)
 
   const handleHeadingsChange = (newHeadings: HeadingInfo[]) => {
     setHeadings(newHeadings)
+  }
+
+  const handleContentChange = (newContent: string) => {
+    if (onContentChange) {
+      onContentChange(newContent)
+    }
   }
 
   return (
@@ -36,6 +44,7 @@ export const MarkdownViewerWithNav: React.FC<MarkdownViewerWithNavProps> = ({
             content={content}
             className={`prose prose-lg max-w-none ${className}`}
             onHeadingsChange={handleHeadingsChange}
+            onContentChange={handleContentChange}
           />
         </div>
       </div>

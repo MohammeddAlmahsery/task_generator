@@ -15,6 +15,7 @@ interface MarkdownViewerProps {
   content: string
   className?: string
   onHeadingsChange?: (headings: HeadingInfo[]) => void
+  onContentChange?: (content: string) => void
 }
 
 // Utility function to generate slug from heading text
@@ -27,7 +28,18 @@ const generateSlug = (text: string): string => {
 }
 
 // Centralized markdown renderer so we can adjust styling / plugins in one place.
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className, onHeadingsChange }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className, onHeadingsChange, onContentChange }) => {
+  
+  // Use state to track current content for re-rendering
+  const [currentContent, setCurrentContent] = React.useState(content)
+  
+  // Update current content when prop changes
+  React.useEffect(() => {
+    setCurrentContent(content)
+  }, [content])
+  
+  // Track checkbox counter for reliable indexing
+  let checkboxCounter = 0
   
   // Extract headings from markdown content
   const headings = useMemo(() => {
@@ -35,7 +47,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
     const extractedHeadings: HeadingInfo[] = []
     let match
     
-    while ((match = headingRegex.exec(content)) !== null) {
+    while ((match = headingRegex.exec(currentContent)) !== null) {
       const level = match[1].length
       const text = match[2].trim()
       const id = generateSlug(text)
@@ -44,7 +56,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
     }
     
     return extractedHeadings
-  }, [content])
+  }, [currentContent])
 
   // Notify parent component about headings change
   React.useEffect(() => {
@@ -61,6 +73,47 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
     }
   }, [])
 
+  // Handle checkbox toggle
+  const toggleCheckbox = useCallback((checkboxIndex: number) => {
+    console.log('toggleCheckbox called with index:', checkboxIndex)
+    console.log('onContentChange available:', !!onContentChange)
+    
+    const lines = currentContent.split('\n')
+    const checkboxRegex = /^(\s*)-\s+\[([ x])\]\s+(.*)$/
+
+    let currentCheckboxIndex = 0
+    const updatedLines = lines.map(line => {
+      const match = line.match(checkboxRegex)
+      if (match) {
+        console.log(`Found checkbox ${currentCheckboxIndex}:`, line)
+        if (currentCheckboxIndex === checkboxIndex) {
+          const [, indent, checked, text] = match
+          const newChecked = checked === ' ' ? 'x' : ' '
+          const newLine = `${indent}- [${newChecked}] ${text}`
+          console.log('Toggling checkbox from:', line, 'to:', newLine)
+          currentCheckboxIndex++
+          return newLine
+        }
+        currentCheckboxIndex++
+      }
+      return line
+    })
+
+    const newContent = updatedLines.join('\n')
+    console.log('Setting new content locally and calling parent callback')
+    
+    // Update local state immediately for instant feedback
+    setCurrentContent(newContent)
+    
+    // Also notify parent if callback exists
+    if (onContentChange) {
+      onContentChange(newContent)
+    }
+  }, [currentContent, onContentChange, setCurrentContent])
+
+  // Reset checkbox counter for each render
+  checkboxCounter = 0
+  
   return (
     <div className={className}>
       <ReactMarkdown
@@ -123,9 +176,36 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
               )
             },
             a: ({ node, ...props }) => <a className="text-blue-600 underline hover:text-blue-800" {...props} />,
+            input: ({ node, type, checked, disabled, ...props }) => {
+              if (type === 'checkbox') {
+                // Get current checkbox index and increment counter
+                const currentIndex = checkboxCounter++
+                console.log('Rendering checkbox', currentIndex, 'checked:', checked)
+                
+                return (
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      console.log('Checkbox clicked:', currentIndex)
+                      toggleCheckbox(currentIndex)
+                    }}
+                    onChange={(e) => {
+                      e.preventDefault()
+                      console.log('Checkbox changed:', currentIndex)
+                      toggleCheckbox(currentIndex)
+                    }}
+                    className="mr-2 h-4 w-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer hover:bg-purple-50 transition-colors"
+                    {...props}
+                  />
+                )
+              }
+              return <input type={type} {...props} />
+            },
         }}
       >
-        {content}
+        {currentContent}
       </ReactMarkdown>
     </div>
   )

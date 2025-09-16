@@ -136,7 +136,10 @@ function ResultContent() {
 
           {/* Content Display */}
           {showPreview ? (
-            <MarkdownViewerWithNav content={markdown} />
+            <MarkdownViewerWithNav 
+              content={markdown} 
+              onContentChange={setMarkdown}
+            />
           ) : (
             <Card className="p-8 bg-white border-gray-200 border-2">
               <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono bg-gray-50 p-6 rounded-lg overflow-auto max-h-96">
