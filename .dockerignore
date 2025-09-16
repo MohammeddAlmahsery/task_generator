@@ -30,6 +30,9 @@
 **/pnpm-debug.log*
 **/yarn-error.log*
 **/npm-debug.log*
+**/pnpm-lock.yaml
+**/yarn.lock
+**/package-lock.json
 .env
 .env.*
 !.env.example

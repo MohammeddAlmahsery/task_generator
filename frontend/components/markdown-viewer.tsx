@@ -3,15 +3,67 @@
 import React from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
+
+export interface HeadingInfo {
+  id: string
+  text: string
+  level: number
+}
 
 interface MarkdownViewerProps {
   content: string
   className?: string
+  onHeadingsChange?: (headings: HeadingInfo[]) => void
+  onContentChange?: (content: string) => void
+}
+
+// Utility function to generate slug from heading text
+const generateSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .trim()
 }
 
 // Centralized markdown renderer so we can adjust styling / plugins in one place.
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className, onHeadingsChange, onContentChange }) => {
+  
+  // Use state to track current content for re-rendering
+  const [currentContent, setCurrentContent] = React.useState(content)
+  
+  // Update current content when prop changes
+  React.useEffect(() => {
+    setCurrentContent(content)
+  }, [content])
+  
+  // Track checkbox counter for reliable indexing
+  let checkboxCounter = 0
+  
+  // Extract headings from markdown content
+  const headings = useMemo(() => {
+    const headingRegex = /^(#{1,2})\s+(.+)$/gm
+    const extractedHeadings: HeadingInfo[] = []
+    let match
+    
+    while ((match = headingRegex.exec(currentContent)) !== null) {
+      const level = match[1].length
+      const text = match[2].trim()
+      const id = generateSlug(text)
+      
+      extractedHeadings.push({ id, text, level })
+    }
+    
+    return extractedHeadings
+  }, [currentContent])
+
+  // Notify parent component about headings change
+  React.useEffect(() => {
+    if (onHeadingsChange) {
+      onHeadingsChange(headings)
+    }
+  }, [headings, onHeadingsChange])
 
   const copy = useCallback(async (text: string) => {
     try {
@@ -21,6 +73,41 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
     }
   }, [])
 
+  // Handle checkbox toggle
+  const toggleCheckbox = useCallback((checkboxIndex: number) => {
+    const lines = currentContent.split('\n')
+    const checkboxRegex = /^(\s*)-\s+\[([ x])\]\s+(.*)$/
+
+    let currentCheckboxIndex = 0
+    const updatedLines = lines.map(line => {
+      const match = line.match(checkboxRegex)
+      if (match) {
+        if (currentCheckboxIndex === checkboxIndex) {
+          const [, indent, checked, text] = match
+          const newChecked = checked === ' ' ? 'x' : ' '
+          const newLine = `${indent}- [${newChecked}] ${text}`
+          currentCheckboxIndex++
+          return newLine
+        }
+        currentCheckboxIndex++
+      }
+      return line
+    })
+
+    const newContent = updatedLines.join('\n')
+    
+    // Update local state immediately for instant feedback
+    setCurrentContent(newContent)
+    
+    // Also notify parent if callback exists
+    if (onContentChange) {
+      onContentChange(newContent)
+    }
+  }, [currentContent, onContentChange, setCurrentContent])
+
+  // Reset checkbox counter for each render
+  checkboxCounter = 0
+  
   return (
     <div className={className}>
       <ReactMarkdown
@@ -30,8 +117,16 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
           ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-1" {...props} />,
             ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-1" {...props} />,
             li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
-            h2: ({ node, ...props }) => <h2 className="text-2xl font-semibold mt-6 mb-3" {...props} />,
+            h1: ({ node, children, ...props }) => {
+              const text = String(children)
+              const id = generateSlug(text)
+              return <h1 id={id} className="text-3xl font-bold mt-8 mb-4 scroll-mt-24" {...props}>{children}</h1>
+            },
+            h2: ({ node, children, ...props }) => {
+              const text = String(children)
+              const id = generateSlug(text)
+              return <h2 id={id} className="text-2xl font-semibold mt-6 mb-3 scroll-mt-24" {...props}>{children}</h2>
+            },
             h3: ({ node, ...props }) => <h3 className="text-xl font-semibold mt-4 mb-2" {...props} />,
             p: ({ node, ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
             code: ({ inline, className, children, ...props }) => {
@@ -75,9 +170,33 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
               )
             },
             a: ({ node, ...props }) => <a className="text-blue-600 underline hover:text-blue-800" {...props} />,
+            input: ({ node, type, checked, disabled, ...props }) => {
+              if (type === 'checkbox') {
+                // Get current checkbox index and increment counter
+                const currentIndex = checkboxCounter++
+                
+                return (
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      toggleCheckbox(currentIndex)
+                    }}
+                    onChange={(e) => {
+                      e.preventDefault()
+                      toggleCheckbox(currentIndex)
+                    }}
+                    className="mr-2 h-4 w-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer hover:bg-purple-50 transition-colors"
+                    {...props}
+                  />
+                )
+              }
+              return <input type={type} {...props} />
+            },
         }}
       >
-        {content}
+        {currentContent}
       </ReactMarkdown>
     </div>
   )

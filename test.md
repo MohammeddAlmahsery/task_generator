@@ -1,15 +1,13 @@
-Download Markdown
-Generate New Mission
 # Intern Task Report  
 
 ---
 
 ## Project Overview  
 Project Name: Nexus - Centralized Internal Tool Dashboard  
-Documentation Source: Project "Nexus" Documentation PDF  
+Documentation Source: Project "Nexus" Documentation (v1.0)  
 
 Summary:  
-Project Nexus aims to develop a unified, web-based dashboard that aggregates all of Acme Corp's disparate internal tools into a single, cohesive portal. The solution will improve employee productivity and user experience by providing Single Sign-On (SSO), a customizable widget-based interface, and centralized administration. The initial MVP will integrate three core applications: LeaveApp, TicketFlow, and ExpenSense.  
+Project Nexus aims to develop a unified, web-based dashboard to centralize all of Acme Corp's internal tools. The goal is to improve employee productivity and user experience by providing a single portal with Single Sign-On (SSO), a customizable interface, and centralized administration, thereby reducing management overhead.  
 
 ---
 
@@ -17,90 +15,86 @@ Project Nexus aims to develop a unified, web-based dashboard that aggregates all
 Name: Alex Chen  
 
 Background Summary:  
-- **CI/CD & Automation:** Experience designing and implementing multi-stage CI/CD pipelines using Jenkins and GitHub Actions, with a focus on automated testing and quality gates.  
-- **Testing & Quality Assurance:** Proficient in using testing frameworks like Pytest and static analysis tools (SonarQube) to enforce code quality and prevent deployment of faulty code.  
-- **Containerization & Cloud:** Strong practical skills with Docker, Kubernetes (Minikube), and AWS, including deploying and managing containerized applications.  
+- Extensive experience with CI/CD, containerization (Docker, Kubernetes), and cloud platforms (AWS).  
+- Proficient in Python, Bash, and YAML, making him well-suited for backend and infrastructure tasks.  
+- Hands-on project experience implementing monitoring solutions with Prometheus and Grafana.  
 
 ---
 
 ## Task Assignment  
-Task Title: Enhance Backend CI/CD Pipeline with Automated Testing and Quality Gates  
+Task Title: Implement Prometheus Metrics for the Nexus Backend API  
 
 Description:  
-The current CI/CD pipeline for the Django backend in Project Nexus lacks automated testing and static code analysis. This task involves modifying the existing GitHub Actions workflow to integrate a robust testing stage that automatically runs unit tests (using Pytest) and a linter/static analyzer before any code is built and deployed.  
+This task involves instrumenting the Django-based Nexus backend application to expose key performance metrics for monitoring. You will integrate a Prometheus client library, configure the application to expose a metrics endpoint, update the Kubernetes deployment manifests to enable metric scraping, and create a basic Grafana dashboard to visualize the data.  
 
 Objective:  
-The final deliverable is an updated GitHub Actions workflow file submitted via a Pull Request. The new pipeline must automatically execute the backend test suite and code analysis checks, and it must fail the build—preventing deployment—if any tests or quality checks do not pass.  
+The final deliverable is a fully functional Grafana dashboard displaying real-time performance metrics (e.g., API request latency, HTTP status code counts, error rates) from the Nexus backend service running in the Kubernetes staging environment.  
 
-Complexity Level: Intermediate  
+Complexity Level: Advanced  
 Expected Duration: 2 weeks  
 
 ---
 
 ## Learning Opportunities  
-- **Enterprise CI/CD:** Gain hands-on experience modifying a production-style CI/CD pipeline that deploys to a Kubernetes (EKS) environment.  
-- **DevOps Best Practices:** Apply knowledge of quality gates, automated testing, and fail-fast principles in a real-world software project.  
-- **Python Test Automation:** Deepen expertise in Pytest by integrating it into a containerized build process within a professional development workflow.  
+- Applying monitoring principles in a production-like cloud environment (AWS EKS), moving beyond local Minikube setups.  
+- Integrating observability tools directly into a Python/Django application framework.  
+- Working with Kubernetes service discovery and annotations for real-world Prometheus integration.  
 
 ---
 
 ## Step-by-Step Plan  
 1. Preparation Stage  
-   - Clone the `nexus_backend` repository.
-   - Set up the local development environment using Docker to run the Django application.
-   - Thoroughly review the existing `.github/workflows/deploy.yml` file to understand the current build, push, and deploy jobs.
-   - Review the `Dockerfile` for the backend service.
-
+   - Clone the `nexus_backend` and `nexus-infrastructure` repositories.  
+   - Follow the `README.md` to set up the local development environment using Docker.  
+   - Gain read-only access to the staging AWS EKS cluster, Prometheus UI, and Grafana instance.  
 2. Exploration Stage  
-   - Research best practices for running Pytest within a Docker container during a CI process.
-   - Investigate lightweight, effective static analysis tools for Python/Django projects (e.g., Flake8, Black) and how to integrate them into GitHub Actions.
-   - Create a `requirements-dev.txt` file to manage testing-specific dependencies like `pytest`, `pytest-django`, and `flake8`.
-
+   - Research the `django-prometheus` library to understand its capabilities and integration patterns.  
+   - Analyze the existing Nexus Django backend structure to identify key API endpoints and models that require monitoring.  
+   - Review the existing Kubernetes manifests (`k8s/manifests/deployment.yaml`) for the backend service.  
 3. Implementation Stage  
-   - Modify the backend `Dockerfile` to include a new multi-stage build target specifically for testing. This stage will install dependencies from `requirements-dev.txt`.
-   - Update the `test` job in the GitHub Actions workflow YAML file.
-   - Add a new step within the `test` job to build the test-specific Docker image.
-   - Add a subsequent step to run the Pytest suite inside a container using the newly built image.
-   - Add a final step to run a static analysis tool like Flake8.
-   - Ensure that the job is configured to exit with a failure code if either the tests or the linter fail.
-
+   - Add the `django-prometheus` library to the `requirements.txt` file.  
+   - Update `config/settings.py` and `config/urls.py` to enable and expose the `/metrics` endpoint.  
+   - Add the necessary Prometheus middleware to automatically instrument API views.  
+   - Modify the `k8s/manifests/deployment.yaml` file to add the required Prometheus scrape annotations to the pod template metadata (`prometheus.io/scrape: 'true'`, `prometheus.io/path: '/metrics'`, `prometheus.io/port: '8000'`).  
 4. Testing & Feedback Stage  
-   - Create a new feature branch for your changes (e.g., `feature/backend-ci-testing`).
-   - Intentionally write a failing test or introduce a style error to confirm the pipeline fails as expected.
-   - Correct the error and push a new commit to verify the pipeline passes when the code is correct.
-   - Submit a Pull Request to the `main` branch, detailing the changes and linking to the successful workflow runs.
-
+   - Test locally to confirm the `/metrics` endpoint is active and exporting data correctly.  
+   - Create a feature branch and push your changes.  
+   - Submit a Pull Request. The CI/CD pipeline will deploy your changes to the staging environment.  
+   - Verify in the staging Prometheus UI that the `nexus-backend` target is being scraped successfully.  
+   - Solicit feedback on your implementation from the DevOps lead.  
 5. Delivery Stage  
-   - Once the Pull Request is approved, merge it into the `main` branch.
-   - Add a brief section to the project's `README.md` explaining the new automated testing stage and how developers can run the tests locally.
-
----
-
-## Resources & References  
-- **Project Documentation:** `Project "Nexus" Documentation PDF`, Sections 4 (Backend Plan) and 6 (Deployment & DevOps Plan).
-- **GitHub Actions Documentation:** [Official Guide to Building and testing Python](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python)
-- **Pytest Documentation:** [pytest-django Documentation](https://pytest-django.readthedocs.io/en/latest/)
-- **Docker Guide:** [Testing a Django Application with Docker and Pytest](https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/)
+   - Create a new dashboard in the staging Grafana instance named "Nexus Backend API Performance".  
+   - Add panels to visualize key metrics like API Request Rate (per endpoint), Error Rate (5xx status codes), and Request Latency (p95/p99).  
+   - Write a short summary in the project's documentation outlining the newly available metrics and linking to the Grafana dashboard.  
+   - Present your work and the new dashboard to the team during the weekly review.  
 
 ---
 
 ## Next Steps  
-Upon successful completion of this task, you will have a solid foundation to:
-- **Implement Code Coverage:** Investigate adding code coverage reporting to the pipeline using `pytest-cov` and a service like Codecov.
-- **Introduce Security Scanning:** Explore integrating a container security scanner (e.g., Trivy, Snyk) into the pipeline to check for vulnerabilities in the Docker image.
-- **Enhance Frontend Pipeline:** Apply the same principles of automated testing and quality gates to the frontend React application's CI/CD workflow.
+- Review the provided "Project Nexus" documentation, focusing on the Backend and DevOps sections.  
+- Schedule a brief onboarding session with the project lead to get access credentials for AWS, Grafana, and the Git repositories.  
+- Begin the local environment setup for the Nexus backend service.
 
 ---
+
+## Resources & References  
+- Project "Nexus" Documentation (v1.0)  
+- Official `django-prometheus` library documentation: [https://github.com/korfuri/django-prometheus](https://github.com/korfuri/django-prometheus)  
+- Prometheus documentation on Kubernetes SD configurations.  
+- Internal repository links: `git.acme.corp/nexus/backend.git`, `git.acme.corp/nexus/infrastructure.git`  
+
+---
+
 ## Check List
-- [ ] Clone the `nexus_backend` repository.
-- [ ] Successfully run the backend application locally using Docker.
-- [ ] Locate and analyze the existing `deploy.yml` GitHub Actions workflow.
-- [ ] Create a `requirements-dev.txt` file and add `pytest`, `pytest-django`, and `flake8`.
-- [ ] Modify the `Dockerfile` to support a dedicated testing stage.
-- [ ] Update the `test` job in `deploy.yml` to build the test image.
-- [ ] Add a step in the `test` job to execute `pytest`.
-- [ ] Add a step in the `test` job to execute `flake8`.
-- [ ] Confirm the pipeline fails correctly when a test is broken.
-- [ ] Confirm the pipeline passes when all tests and checks are successful.
-- [ ] Create a Pull Request with your changes for review.
-- [ ] Update the project's `README.md` with instructions for the new testing process.
+
+- [x] Local development environment is set up and running.
+- [ ] `django-prometheus` library is added to `requirements.txt`.
+- [ ] Django application is configured to expose the `/metrics` endpoint.
+- [ ] `/metrics` endpoint is verified and functional in the local environment.
+- [ ] Kubernetes `deployment.yaml` is updated with correct Prometheus annotations.
+- [ ] A Pull Request with the changes is submitted for review.
+- [ ] Changes are successfully deployed to the staging environment.
+- [ ] Prometheus target for `nexus-backend` is confirmed as "UP" in the Prometheus UI.
+- [ ] A new Grafana dashboard is created with at least 3 relevant metric panels.
+- [ ] Project documentation is updated with details of the new monitoring capabilities.
+- [ ] A final walkthrough of the dashboard is presented to the team.
